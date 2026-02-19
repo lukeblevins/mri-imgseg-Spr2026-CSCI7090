@@ -1,1 +1,1 @@
-# mri-imgseg-Spr2026-CSCI7090
+# Multimodal Seizure Prediction Using EEG Time-Series Features and Clinical Metadata
