@@ -8,7 +8,7 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{csquotes}
-\usepackage[backend=bibtex,style=ieee]{biblatex}
+\usepackage[backend=biber,style=ieee]{biblatex}
 \addbibresource{references.bib}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -17,7 +17,7 @@
 \title{
 Multimodal Seizure Prediction Using EEG Time-Series Features and Clinical Metadata
 % TODO: Edit GitHub repo and documentation to use a more descriptive name (TBD)
-\thanks{Code available at: \url{https://github.com/lukeblevins/mri-imgseg-Spr2026-CSCI7090}}
+\thanks{Code available at: \url{https://github.com/lukeblevins/eeg-Spr2026-CSCI7090}}
 }
 
 \author{
@@ -44,7 +44,7 @@ av05604@georgiasouthern.edu}
 
 
 \begin{abstract}
-Millions of people worldwide suffer from a neurological condition known as epilepsy, which causes recurring seizures in those afflicted. These seizures and their symptoms vary widely from person to person, making diagnosis and treatment difficult for medical professionals. Electroencephalography (EEG) recordings are used not only to diagnose but to predict epileptic seizures. Machine Learning algorithms using these recordings have emerged over the years as a useful tool for epileptic seizure prediction. This systematic literature review aims to analyze the accuracy and performance of these models. Code available at: \url{https://github.com/lukeblevins/mri-imgseg-Spr2026-CSCI7090}
+Millions of people worldwide suffer from a neurological condition known as epilepsy, which causes recurring seizures in those afflicted. These seizures and their symptoms vary widely from person to person, making diagnosis and treatment difficult for medical professionals. Electroencephalography (EEG) recordings are used not only to diagnose but to predict epileptic seizures. Machine Learning algorithms using these recordings have emerged over the years as a useful tool for epileptic seizure prediction. This systematic literature review aims to analyze the accuracy and performance of these models. Code available at: \url{https://github.com/lukeblevins/eeg-Spr2026-CSCI7090}
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -63,14 +63,14 @@ For this systematic literature review, the scientific databases searched were Pu
 \begin{itemize}
   \item \textbf{1:} Articles published between 2021 and the present date.
   \item \textbf{2:} Articles written in English.
-  \item \textbf{3:} Peer-reviewed articles published in a highly recognized journal.
+  \item \textbf{3:} Peer-reviewed articles published in a reputable journal.
   \item \textbf{4:} Articles that have been cited in numerous other articles.
 \end{itemize}
 
 \subsection{Exclusion Criteria}
 \begin{itemize}
   \item \textbf{1:} Articles on animal studies rather than human.
-  \item \textbf{2:} Articles that did not use EEG data.
+  \item \textbf{2:} Articles that did not use seizure or EEG data.
   \item \textbf{3:} Articles foucssed primarily on seizure dection opposed to prediction.
   \item \textbf{4:} Articles that are not peer-reviewed.
 \end{itemize}
@@ -95,10 +95,10 @@ Extending the findings of previous systematic reviews, the study ``A Review of M
 While systematic reviews provide insight into recurring limitations in seizure prediction research, experimental studies continue to develop new approaches to predict seizures. One example is the study ``Predicting epileptic seizures based on EEG signals using spatial depth features of a 3D-2D hybrid CNN.'' This work proposes a hybrid 3D--2D convolutional neural network to capture spatial and inter-channel relationships in multi-channel EEG data. The model combines 3D and 2D convolutional layers to capture spatial structure and inter-channel correlations without substantially increasing computational complexity. However, limitations described in the systematic reviews remain relevant, as the study is evaluated on static datasets rather than continuous real-time settings and uses patient-specific modeling. As the field advances, stronger evidence for clinical translation will require evaluation on more generalizable data and validation protocols aligned with deployment conditions.
 
 \section{Results}
-The proposed integrated framework demonstrates improved predictive performance compared to models using imaging or clinical data alone.
+\noindent This review synthesizes recent work on EEG-based seizure prediction. The surveyed papers use different datasets, preprocessing choices, model architectures, and evaluation protocols, which makes direct comparison difficult.
 
 \section{Discussion}
-These findings highlight the value of tumor-aware feature extraction and integrated learning for interpretable prognosis in neuro-oncology.
+\noindent Across the reviewed literature, commonly noted issues include inconsistent evaluation procedures and inconsistent reporting of metrics. Future studies may improve comparability by addressing this.
 
 
 \nocite{*}
