@@ -4,3 +4,11 @@
 - Luke Blevins
 - Jacob Rawlins
 - Arnoldo Vilches
+
+## Setup
+
+Install the Python dependencies:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
