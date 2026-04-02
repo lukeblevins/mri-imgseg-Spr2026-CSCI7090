@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Realtime Builder",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_realtime_builder.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "EEG_PROJECT_ROOT": "${workspaceFolder}"
+      }
+    }
+  ]
+}

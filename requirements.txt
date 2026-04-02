@@ -5,3 +5,4 @@ brainflow
 matplotlib
 mne
 seaborn
+ipykernel
