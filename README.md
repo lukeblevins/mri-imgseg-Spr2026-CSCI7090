@@ -35,7 +35,7 @@ This repository currently provides the data-engineering side of the project rath
 
 ### 1. Static EEG preprocessing workflow
 
-The notebook at `eegStatic/Data/DataWrangling.ipynb` supports:
+The notebook at `eegStatic/notebooks/DataWrangling.ipynb` supports:
 
 - EEG preprocessing and harmonization
 - sliding-window epoch construction
@@ -99,8 +99,9 @@ The current repository mainly covers steps 1 through 3 for EEG data preparation,
 |-- main.pdf
 |-- references.bib
 `-- eegStatic/
-    `-- Data/
-        |-- DataWrangling.ipynb
+    |-- notebooks/
+    |   `-- DataWrangling.ipynb
+    `-- data/
         |-- chbmit/
         |   `-- chb01/
         |       |-- chb01-summary.txt
@@ -124,8 +125,8 @@ It also supports real-time or simulated streaming acquisition through BrainFlow.
 
 Static benchmark data is stored under:
 
-- `eegStatic/Data/chbmit/`
-- `eegStatic/Data/siena/`
+- `eegStatic/data/chbmit/`
+- `eegStatic/data/siena/`
 
 These files are used for preprocessing, feature engineering, and early-stage seizure prediction experiments.
 
@@ -169,7 +170,59 @@ jupyter lab
 
 Primary notebook:
 
-- `eegStatic/Data/DataWrangling.ipynb`
+- `eegStatic/notebooks/DataWrangling.ipynb`
+
+### Dataset setup for local and Colab runs
+
+The notebook expects a dataset root that directly contains both `chbmit/` and `siena/`.
+The required structure is:
+
+```text
+<dataset root>/
+  chbmit/chb01/chb01_01.edf
+  siena/pn00/PN00-1.edf
+```
+
+Local execution works when the dataset root is either:
+
+- `eegStatic/data/` inside this repository
+- a separate top-level `data/` directory that contains `chbmit/` and `siena/`
+
+Colab execution works when the dataset is:
+
+- uploaded into `/content/data/`
+- uploaded into `/content/eegStatic/data/`
+- stored anywhere in mounted Google Drive where the expected EDF files exist
+- pointed to explicitly with `EEG_DATA_ROOT`
+
+Important detail:
+
+- `EEG_DATA_ROOT` must point to the folder that directly contains `chbmit/` and `siena/`, not to one of those subfolders
+
+Local example using the repository layout:
+
+```text
+eeg-Spr2026-CSCI7090/
+  eegStatic/
+    notebooks/DataWrangling.ipynb
+    data/
+      chbmit/chb01/chb01_01.edf
+      siena/pn00/PN00-1.edf
+```
+
+Colab example using Google Drive:
+
+```python
+from google.colab import drive
+import os
+
+drive.mount("/content/drive")
+os.environ["EEG_DATA_ROOT"] = "/content/drive/MyDrive/path/to/eegStatic/data"
+```
+
+After mounting Drive or changing `EEG_DATA_ROOT`, rerun the notebook cell that resolves dataset paths.
+
+The notebook first checks common local and Colab locations such as `eegStatic/data`, `data`, `/content/data`, and `/content/eegStatic/data`. If those do not match, it falls back to a recursive search of mounted Google Drive for `chb01_01.edf` and `PN00-1.edf`.
 
 Recommended workflow:
 
