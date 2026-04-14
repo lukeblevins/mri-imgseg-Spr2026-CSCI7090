@@ -16,7 +16,8 @@ The paper draft in `paper/` captures the literature review, research gaps, and t
 |-- pyproject.toml
 |-- src/eeg_project/
 |-- notebooks/
-|   |-- static/data_wrangling.ipynb
+|   |-- static/build_static_dataset.ipynb
+|   |-- static/data_wrangling_walkthrough.ipynb
 |   `-- realtime/labeling.ipynb
 |-- scripts/
 |   `-- run_realtime_builder.py
@@ -34,12 +35,10 @@ The paper draft in `paper/` captures the literature review, research gaps, and t
 
 ### Static benchmark workflow
 
-Reusable static EEG logic lives under `src/eeg_project/static/`. The notebook at `notebooks/static/data_wrangling.ipynb` is now a thin entrypoint that:
+Reusable static EEG logic lives under `src/eeg_project/static/`. Two notebooks cover this workflow:
 
-- resolves the dataset root
-- preprocesses CHB-MIT and Siena example recordings
-- constructs fixed-length epochs
-- extracts basic time-domain features
+- `notebooks/static/data_wrangling_walkthrough.ipynb` — step-by-step pipeline walkthrough on example recordings: resolves the dataset root, preprocesses CHB-MIT and Siena recordings, constructs fixed-length epochs, and extracts basic time-domain features
+- `notebooks/static/build_static_dataset.ipynb` — runs the full `build_static_dataset` pipeline script across all subjects and sessions, saving outputs to `artifacts/static/`
 
 ### Realtime workflow
 
@@ -104,7 +103,7 @@ Main dependencies:
 Open the static notebook:
 
 ```bash
-jupyter lab notebooks/static/data_wrangling.ipynb
+jupyter lab notebooks/static/data_wrangling_walkthrough.ipynb
 ```
 
 Run the realtime dataset builder:
