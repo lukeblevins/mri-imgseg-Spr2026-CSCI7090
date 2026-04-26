@@ -10,6 +10,8 @@ from typing import Dict, List, Optional, Tuple
 import mne
 import numpy as np
 import pandas as pd
+from scipy.signal import welch
+from scipy.stats import skew, kurtosis
 
 
 SeizureInterval = Tuple[float, float]
@@ -30,7 +32,7 @@ class StaticBuildConfig:
     interictal_gap_sec: float = 300.0
 
     drop_non_prediction_windows: bool = True
-    feature_version: str = "v1"
+    feature_version: str = "v2_expanded_eeg"
     channel_schema: str = "raw_mne_channels"
     warn_on_missing_annotations: bool = True
 
@@ -140,6 +142,102 @@ def _channel_signature(raw: mne.io.BaseRaw) -> str:
 
 def _file_size_mb(path: Path) -> float:
     return path.stat().st_size / (1024 * 1024)
+
+
+def _zero_crossing_rate(x: np.ndarray) -> float:
+    if x.size < 2:
+        return 0.0
+    return float(np.mean(np.diff(np.signbit(x)).astype(np.float32)))
+
+
+def _line_length(x: np.ndarray) -> float:
+    if x.size < 2:
+        return 0.0
+    return float(np.sum(np.abs(np.diff(x))))
+
+
+def _hjorth_parameters(x: np.ndarray) -> Tuple[float, float, float]:
+    if x.size < 3:
+        return 0.0, 0.0, 0.0
+
+    dx = np.diff(x)
+    ddx = np.diff(dx)
+
+    var_x = np.var(x)
+    var_dx = np.var(dx)
+    var_ddx = np.var(ddx)
+
+    activity = float(var_x)
+
+    mobility = float(np.sqrt(var_dx / var_x)) if var_x > 1e-12 else 0.0
+    mobility_dx = float(np.sqrt(var_ddx / var_dx)) if var_dx > 1e-12 else 0.0
+    complexity = float(mobility_dx / mobility) if mobility > 1e-12 else 0.0
+
+    return activity, mobility, complexity
+
+
+def _bandpower_features(x: np.ndarray, sfreq: float) -> Dict[str, float]:
+    if x.size < 4:
+        return {
+            "delta_power": 0.0,
+            "theta_power": 0.0,
+            "alpha_power": 0.0,
+            "beta_power": 0.0,
+            "gamma_power": 0.0,
+            "rel_delta_power": 0.0,
+            "rel_theta_power": 0.0,
+            "rel_alpha_power": 0.0,
+            "rel_beta_power": 0.0,
+            "rel_gamma_power": 0.0,
+            "spectral_entropy": 0.0,
+        }
+
+    nperseg = min(256, len(x))
+    freqs, psd = welch(x, fs=sfreq, nperseg=nperseg)
+
+    def bandpower(fmin: float, fmax: float) -> float:
+        mask = (freqs >= fmin) & (freqs < fmax)
+        if not np.any(mask):
+            return 0.0
+        return float(np.trapezoid(psd[mask], freqs[mask]))
+
+    delta = bandpower(0.5, 4.0)
+    theta = bandpower(4.0, 8.0)
+    alpha = bandpower(8.0, 13.0)
+    beta = bandpower(13.0, 30.0)
+    gamma = bandpower(30.0, 40.0)
+
+    total_power = delta + theta + alpha + beta + gamma
+    if total_power <= 1e-12:
+        rel_delta = rel_theta = rel_alpha = rel_beta = rel_gamma = 0.0
+    else:
+        rel_delta = delta / total_power
+        rel_theta = theta / total_power
+        rel_alpha = alpha / total_power
+        rel_beta = beta / total_power
+        rel_gamma = gamma / total_power
+
+    psd_sum = np.sum(psd)
+    if psd_sum <= 1e-12:
+        spec_entropy = 0.0
+    else:
+        p = psd / psd_sum
+        p = p[p > 0]
+        spec_entropy = float(-np.sum(p * np.log(p)))
+
+    return {
+        "delta_power": float(delta),
+        "theta_power": float(theta),
+        "alpha_power": float(alpha),
+        "beta_power": float(beta),
+        "gamma_power": float(gamma),
+        "rel_delta_power": float(rel_delta),
+        "rel_theta_power": float(rel_theta),
+        "rel_alpha_power": float(rel_alpha),
+        "rel_beta_power": float(rel_beta),
+        "rel_gamma_power": float(rel_gamma),
+        "spectral_entropy": float(spec_entropy),
+    }
 
 
 # -----------------------------
@@ -414,24 +512,62 @@ def extract_epoch_features(epochs: mne.Epochs) -> pd.DataFrame:
         epoch = X[i]
         flat = epoch.reshape(-1)
 
+        mean_val = float(np.mean(flat))
+        std_val = float(np.std(flat))
+        min_val = float(np.min(flat))
+        max_val = float(np.max(flat))
+        range_val = float(max_val - min_val)
+
+        median_val = float(np.median(flat))
+        q25 = float(np.percentile(flat, 25))
+        q75 = float(np.percentile(flat, 75))
+        iqr_val = float(q75 - q25)
+
+        energy_val = float(np.sum(flat ** 2))
+        rms_val = float(np.sqrt(np.mean(flat ** 2)))
+        abs_mean_val = float(np.mean(np.abs(flat)))
+        peak_to_peak_val = float(np.ptp(flat))
+
+        skew_val = float(skew(flat, bias=False)) if flat.size > 2 else 0.0
+        kurt_val = float(kurtosis(flat, bias=False)) if flat.size > 3 else 0.0
+
+        line_length_val = _line_length(flat)
+        zero_crossing_val = _zero_crossing_rate(flat)
+
+        hjorth_activity, hjorth_mobility, hjorth_complexity = _hjorth_parameters(flat)
+        band_feats = _bandpower_features(flat, sfreq)
+
         rows.append(
             {
                 "epoch_index": i,
-                "mean": float(np.mean(flat)),
-                "std": float(np.std(flat)),
-                "min": float(np.min(flat)),
-                "max": float(np.max(flat)),
-                "range": float(np.max(flat) - np.min(flat)),
-                "energy": float(np.sum(flat ** 2)),
-                "rms": float(np.sqrt(np.mean(flat ** 2))),
-                "abs_mean": float(np.mean(np.abs(flat))),
+                "mean": mean_val,
+                "std": std_val,
+                "min": min_val,
+                "max": max_val,
+                "range": range_val,
+                "median": median_val,
+                "iqr": iqr_val,
+                "energy": energy_val,
+                "rms": rms_val,
+                "abs_mean": abs_mean_val,
+                "peak_to_peak": peak_to_peak_val,
+                "skewness": skew_val,
+                "kurtosis": kurt_val,
+                "line_length": line_length_val,
+                "zero_crossing_rate": zero_crossing_val,
+                "hjorth_activity": hjorth_activity,
+                "hjorth_mobility": hjorth_mobility,
+                "hjorth_complexity": hjorth_complexity,
+                **band_feats,
                 "n_channels": int(epoch.shape[0]),
                 "n_samples": int(epoch.shape[1]),
                 "sfreq": sfreq,
             }
         )
 
-    return pd.DataFrame(rows)
+    df = pd.DataFrame(rows)
+    df = df.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+    return df
 
 
 # -----------------------------
@@ -499,9 +635,30 @@ CANONICAL_COLUMNS = [
     "min",
     "max",
     "range",
+    "median",
+    "iqr",
     "energy",
     "rms",
     "abs_mean",
+    "peak_to_peak",
+    "skewness",
+    "kurtosis",
+    "line_length",
+    "zero_crossing_rate",
+    "hjorth_activity",
+    "hjorth_mobility",
+    "hjorth_complexity",
+    "delta_power",
+    "theta_power",
+    "alpha_power",
+    "beta_power",
+    "gamma_power",
+    "rel_delta_power",
+    "rel_theta_power",
+    "rel_alpha_power",
+    "rel_beta_power",
+    "rel_gamma_power",
+    "spectral_entropy",
     "n_channels",
     "n_samples",
     "sfreq",
@@ -678,7 +835,6 @@ def build_labeled_static_prediction_dataset(config: StaticBuildConfig) -> pd.Dat
 
             all_rows.append(ensure_canonical_schema(features))
 
-            # free some large objects before next file
             del epochs
             del raw
 
@@ -713,9 +869,30 @@ def split_features_and_target(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray,
         "min",
         "max",
         "range",
+        "median",
+        "iqr",
         "energy",
         "rms",
         "abs_mean",
+        "peak_to_peak",
+        "skewness",
+        "kurtosis",
+        "line_length",
+        "zero_crossing_rate",
+        "hjorth_activity",
+        "hjorth_mobility",
+        "hjorth_complexity",
+        "delta_power",
+        "theta_power",
+        "alpha_power",
+        "beta_power",
+        "gamma_power",
+        "rel_delta_power",
+        "rel_theta_power",
+        "rel_alpha_power",
+        "rel_beta_power",
+        "rel_gamma_power",
+        "spectral_entropy",
         "n_channels",
         "n_samples",
         "sfreq",
