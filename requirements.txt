@@ -1,6 +1,8 @@
 numpy
 pandas
 scipy
+scikit-learn
+torch
 brainflow
 matplotlib
 mne
