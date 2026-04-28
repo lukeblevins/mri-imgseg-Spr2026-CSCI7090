@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 
+from eeg_project.common.paths import resolve_dataset_root
 from eeg_project.static import (
     StaticBuildConfig,
     build_static_only_master_dataframe,
@@ -17,8 +18,8 @@ def main() -> None:
     parser.add_argument(
         "--dataset-root",
         type=str,
-        required=True,
-        help="Root containing chbmit/ and/or siena/",
+        default=None,
+        help="Root containing chbmit/ and/or siena/ (auto-discovered if omitted)",
     )
     parser.add_argument(
         "--output-root",
@@ -43,8 +44,10 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    dataset_root, _ = resolve_dataset_root(args.dataset_root)
+
     config = StaticBuildConfig(
-        dataset_root=args.dataset_root,
+        dataset_root=dataset_root,
         target_sfreq=args.target_sfreq,
         epoch_duration=args.epoch_duration,
         epoch_overlap=args.epoch_overlap,
