@@ -1,9 +1,9 @@
 # Multimodal Seizure Prediction Using EEG Time-Series Features and Clinical Metadata
 
-This repository is organized around the research workflow instead of a single `eegStatic/` subtree. It currently covers two active tracks:
+This repository is organized around the research workflow instead of a single subtree. It currently covers two active tracks:
 
-- benchmark EEG preprocessing and feature extraction
-- realtime EEG window generation and downstream labeling
+- Benchmark EEG preprocessing and feature extraction
+- Realtime EEG window generation and downstream labeling
 
 The paper draft in `paper/` captures the literature review, research gaps, and the proposed multimodal seizure prediction pipeline that motivates the codebase.
 
@@ -21,6 +21,9 @@ The paper draft in `paper/` captures the literature review, research gaps, and t
 |   |-- 03_cnn_raw_signal_baseline.ipynb
 |   `-- realtime/labeling.ipynb
 |-- scripts/
+|   |-- build_static_dataset.py
+|   |-- eeg_eda_visualizations.py
+|   |-- export_raw_windows.py
 |   `-- run_realtime_builder.py
 |-- paper/
 |   |-- main.tex
@@ -36,11 +39,16 @@ The paper draft in `paper/` captures the literature review, research gaps, and t
 
 ### Static benchmark workflow
 
-Reusable static EEG logic lives under `src/eeg_project/static/`. Three notebooks cover this workflow:
+Reusable static EEG logic lives under `src/eeg_project/static/`. Three notebooks cover this workflow across two modeling sub-approaches:
+
+**Feature engineering path** — preprocess recordings, extract hand-crafted time-domain features, and train a classical ML baseline:
 
 - `notebooks/01_preprocessing_walkthrough.ipynb` — step-by-step pipeline walkthrough on example recordings: resolves the dataset root, preprocesses CHB-MIT and Siena recordings, constructs fixed-length epochs, and extracts basic time-domain features
 - `notebooks/02_dataset_pipeline_and_rf_baseline.ipynb` — runs the full `build_static_dataset` pipeline script across all subjects and sessions, saving outputs to `artifacts/static/`, then trains and evaluates a Random Forest baseline classifier
-- `notebooks/03_cnn_raw_signal_baseline.ipynb` — trains a 1D CNN directly on raw EEG signal windows (an alternative to the engineered-feature RF approach); saves the trained model to `artifacts/static/eeg_1d_cnn.pt`
+
+**Raw signal path** — bypass feature engineering and feed windowed signals directly into a neural network:
+
+- `notebooks/03_cnn_raw_signal_baseline.ipynb` — trains a 1D CNN directly on raw EEG signal windows; saves the trained model to `artifacts/static/eeg_1d_cnn.pt`
 
 ### Realtime workflow
 
@@ -95,30 +103,12 @@ Main dependencies:
 - `numpy`
 - `pandas`
 - `scipy`
+- `scikit-learn`
+- `torch`
 - `matplotlib`
 - `seaborn`
 - `mne`
 - `brainflow`
-
-## Running The Workflows
-
-Open the static notebook:
-
-```bash
-jupyter lab notebooks/01_preprocessing_walkthrough.ipynb
-```
-
-Run the realtime dataset builder:
-
-```bash
-python scripts/run_realtime_builder.py
-```
-
-Then open the labeling notebook:
-
-```bash
-jupyter lab notebooks/realtime/labeling.ipynb
-```
 
 ## Paper Sources
 
