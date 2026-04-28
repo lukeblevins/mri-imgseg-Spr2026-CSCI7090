@@ -221,3 +221,6 @@ paper/*.fls
 paper/*.log
 paper/*.out
 paper/*.run.xml
+
+# Code review agents
+.claude/*
