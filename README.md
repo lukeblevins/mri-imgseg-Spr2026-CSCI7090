@@ -16,8 +16,9 @@ The paper draft in `paper/` captures the literature review, research gaps, and t
 |-- pyproject.toml
 |-- src/eeg_project/
 |-- notebooks/
-|   |-- static/01_preprocessing_walkthrough.ipynb
-|   |-- static/02_dataset_pipeline_and_rf_baseline.ipynb
+|   |-- 01_preprocessing_walkthrough.ipynb
+|   |-- 02_dataset_pipeline_and_rf_baseline.ipynb
+|   |-- 03_cnn_raw_signal_baseline.ipynb
 |   `-- realtime/labeling.ipynb
 |-- scripts/
 |   `-- run_realtime_builder.py
@@ -35,10 +36,11 @@ The paper draft in `paper/` captures the literature review, research gaps, and t
 
 ### Static benchmark workflow
 
-Reusable static EEG logic lives under `src/eeg_project/static/`. Two notebooks cover this workflow:
+Reusable static EEG logic lives under `src/eeg_project/static/`. Three notebooks cover this workflow:
 
-- `notebooks/static/01_preprocessing_walkthrough.ipynb` — step-by-step pipeline walkthrough on example recordings: resolves the dataset root, preprocesses CHB-MIT and Siena recordings, constructs fixed-length epochs, and extracts basic time-domain features
-- `notebooks/static/02_dataset_pipeline_and_rf_baseline.ipynb` — runs the full `build_static_dataset` pipeline script across all subjects and sessions, saving outputs to `artifacts/static/`, then trains and evaluates a Random Forest baseline classifier
+- `notebooks/01_preprocessing_walkthrough.ipynb` — step-by-step pipeline walkthrough on example recordings: resolves the dataset root, preprocesses CHB-MIT and Siena recordings, constructs fixed-length epochs, and extracts basic time-domain features
+- `notebooks/02_dataset_pipeline_and_rf_baseline.ipynb` — runs the full `build_static_dataset` pipeline script across all subjects and sessions, saving outputs to `artifacts/static/`, then trains and evaluates a Random Forest baseline classifier
+- `notebooks/03_cnn_raw_signal_baseline.ipynb` — trains a 1D CNN directly on raw EEG signal windows (an alternative to the engineered-feature RF approach); saves the trained model to `artifacts/static/eeg_1d_cnn.pt`
 
 ### Realtime workflow
 
@@ -103,7 +105,7 @@ Main dependencies:
 Open the static notebook:
 
 ```bash
-jupyter lab notebooks/static/01_preprocessing_walkthrough.ipynb
+jupyter lab notebooks/01_preprocessing_walkthrough.ipynb
 ```
 
 Run the realtime dataset builder:
