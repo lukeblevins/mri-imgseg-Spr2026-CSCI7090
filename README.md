@@ -16,8 +16,8 @@ The paper draft in `paper/` captures the literature review, research gaps, and t
 |-- pyproject.toml
 |-- src/eeg_project/
 |-- notebooks/
-|   |-- static/build_static_dataset.ipynb
-|   |-- static/data_wrangling_walkthrough.ipynb
+|   |-- static/01_preprocessing_walkthrough.ipynb
+|   |-- static/02_dataset_pipeline_and_rf_baseline.ipynb
 |   `-- realtime/labeling.ipynb
 |-- scripts/
 |   `-- run_realtime_builder.py
@@ -37,8 +37,8 @@ The paper draft in `paper/` captures the literature review, research gaps, and t
 
 Reusable static EEG logic lives under `src/eeg_project/static/`. Two notebooks cover this workflow:
 
-- `notebooks/static/data_wrangling_walkthrough.ipynb` — step-by-step pipeline walkthrough on example recordings: resolves the dataset root, preprocesses CHB-MIT and Siena recordings, constructs fixed-length epochs, and extracts basic time-domain features
-- `notebooks/static/build_static_dataset.ipynb` — runs the full `build_static_dataset` pipeline script across all subjects and sessions, saving outputs to `artifacts/static/`
+- `notebooks/static/01_preprocessing_walkthrough.ipynb` — step-by-step pipeline walkthrough on example recordings: resolves the dataset root, preprocesses CHB-MIT and Siena recordings, constructs fixed-length epochs, and extracts basic time-domain features
+- `notebooks/static/02_dataset_pipeline_and_rf_baseline.ipynb` — runs the full `build_static_dataset` pipeline script across all subjects and sessions, saving outputs to `artifacts/static/`, then trains and evaluates a Random Forest baseline classifier
 
 ### Realtime workflow
 
@@ -103,7 +103,7 @@ Main dependencies:
 Open the static notebook:
 
 ```bash
-jupyter lab notebooks/static/data_wrangling_walkthrough.ipynb
+jupyter lab notebooks/static/01_preprocessing_walkthrough.ipynb
 ```
 
 Run the realtime dataset builder:
