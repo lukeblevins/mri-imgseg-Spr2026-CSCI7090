@@ -25,7 +25,23 @@ from .target_label import (
     summarize_dataset,
 )
 
+from .pipeline import (
+    FEATURE_COLS,
+    evaluate_model,
+    prepare_train_test_split,
+    train_random_forest,
+    tune_threshold,
+    main as run_pipeline,
+)
+
 __all__ = [
+    "FEATURE_COLS",
+    "evaluate_model",
+    "prepare_train_test_split",
+    "run_pipeline",
+    "train_random_forest",
+    "tune_threshold",
+
     "CANONICAL_COLUMNS",
     "StaticBuildConfig",
     "append_realtime_dataframe",
